@@ -44,11 +44,13 @@ public class Main {
     public static boolean isOperation(String input) {
         boolean operation = false;
         int count = 0;
+        if (input.charAt(0) == '-')
+            count--;
         for (int i = 0; i < input.length(); i++) {
             if (input.charAt(i) == '+' || input.charAt(i) == '-' || input.charAt(i) == '*' || input.charAt(i) == '/')
                 count++;
         }
-        if (count > 0) operation = true;
+        if (count == 1) operation = true;
         else operation = false;
         return operation;
     }
@@ -239,30 +241,25 @@ public class Main {
         Scanner sc = new Scanner(System.in);
         String input = sc.nextLine();
         sc.close();
-        boolean arabicBol = false;
-        boolean flag = false;
-        if (checkString(input)) {
+
+        if (!isInputString(input) && !isOperation(input) && input.length() > 5) {
+            System.out.println("Формат математической операции не удовлетворяет заданию - два операнда и один оператор (+, -, /, *)");
+        } else if (!isInputString(input)) {
+            System.out.println("Строка не является математической выражением");
+        } else if (!isOperation(input)) {
+            System.out.println("Неверная арифметическая операция!");
+        } else if (checkString(input)) {
             System.out.println("Используются одновременно разные системы счисления!");
-            flag = true;
+        } else if (!inRangeArabic(input)) {
+            System.out.println("Диапозон целых чисел должен быть от 1 до 10!");
+        } else if (checkArabic(input)) {
+            System.out.println("Ответ: " + calc(input));
+        } else if (!checkRoman(input)) {
+            System.out.println("Диапозон целых чисел должен быть от 1 до 10!");
+        } else if (checkRoman(input)) {
+            String arabic = convertToArabic(input);
+            String resArabic = calc(arabic);
+            System.out.println("Ответ: " + convertToRoman(resArabic));
         }
-        if (isInputString(input)) {
-            if (isOperation(input)) {
-                if (inRangeArabic(input)) {
-                    if (checkArabic(input)) {
-                        System.out.println("Ответ: " + calc(input));
-                        arabicBol = true;
-                    }
-                }
-                if (!arabicBol) {
-                    if (checkRoman(input)) {
-                        String arabic = convertToArabic(input);
-                        String resArabic = calc(arabic);
-                        System.out.println("Ответ: " + convertToRoman(resArabic));
-                    } else if (!flag) {
-                        System.out.println("Диапозон целых чисел должен быть от 1 до 10!");
-                    }
-                }
-            } else System.out.println("Неверная арифметическая операция!");
-        } else System.out.println("Строка не является математической выражением!");
     }
 }
