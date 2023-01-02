@@ -41,7 +41,19 @@ public class Main {
         return result;
     }
 
-    public static boolean inRangeNumber(String input) {
+    public static boolean isOperation(String input) {
+        boolean operation = false;
+        int count = 0;
+        for (int i = 0; i < input.length(); i++) {
+            if (input.charAt(i) == '+' || input.charAt(i) == '-' || input.charAt(i) == '*' || input.charAt(i) == '/')
+                count++;
+        }
+        if (count > 0) operation = true;
+        else operation = false;
+        return operation;
+    }
+
+    public static boolean inRangeArabic(String input) {
         String[] charArray = input.split(" ");
         int count = 0;
         boolean isNum;
@@ -59,6 +71,32 @@ public class Main {
             return false;
         else return true;
     }
+
+    public static boolean checkString(String input) {
+        boolean result = false;
+        String[] tempRom = input.split(" ");
+        String[] romanNum = {"I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"};
+        int countR = 0;
+        for (int i = 0; i < romanNum.length; i++) {
+            for (int j = 0; j < tempRom.length; j++) {
+                if (tempRom[j].equals(romanNum[i]))
+                    countR++;
+            }
+        }
+        String[] tempNum = input.split(" ");
+        String[] arabicNum = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"};
+        int countA = 0;
+        for (int i = 0; i < arabicNum.length; i++) {
+            for (int j = 0; j < tempNum.length; j++) {
+                if (tempNum[j].equals(arabicNum[i]))
+                    countA++;
+            }
+        }
+        if (countA == 1 && countR == 1)
+            result = true;
+        return result;
+    }
+
 
     public static boolean checkRoman(String input) {
         String[] temp = input.split(" ");
@@ -131,6 +169,9 @@ public class Main {
     public static String convertToRoman(String input) {
         int inputInt = Integer.parseInt(input);
         String result = "";
+        if (inputInt <= 0) {
+            result = "В римской системе нет отрицательных чисел и нуля!";
+        }
         if (inputInt >= 10) {
             int amountTen = inputInt;
             while (amountTen > 10) {
@@ -143,36 +184,48 @@ public class Main {
                 }
             else if (inputInt == 10) {
                 result = "X";
+            } else if (amountTen == 4) {
+                result = "XL";
+            } else if (amountTen == 5) {
+                result = "L";
+            } else if (amountTen >= 6 && amountTen <= 8) {
+                int temp = amountTen - 5;
+                String res = "";
+                while (temp > 0) {
+                    res += "X";
+                    temp--;
+                }
+                result += "L" + res;
+            } else if (amountTen == 9) {
+                result = "XC";
+            } else if (amountTen == 10) {
+                result = "C";
             }
         }
         int div = inputInt;
-
-
         while (div > 10) {
             div %= 10;
         }
-        System.out.println(div);
         if (div <= 3)
             while (div > 0) {
                 result += "I";
                 div--;
             }
         else if (div == 4) {
-            result = "IV";
+            result += "IV";
         } else if (div == 5) {
-            result = "V";
+            result += "V";
+        } else if (div >= 6 && div <= 8) {
+            int temp = div - 5;
+            String res = "";
+            while (temp > 0) {
+                res += "I";
+                temp--;
+            }
+            result += "V" + res;
+        } else if (div == 9) {
+            result += "IX";
         }
-
-//        System.out.println(result);
-
-//        if (inputInt % 100 == 0)
-//            result = "C";
-//        else if (inputInt % 50 == 0)
-//            result = "L";
-//        else if (inputInt % 10 == 0)
-//            result = "X";
-
-
         return result;
     }
 
@@ -183,37 +236,33 @@ public class Main {
         System.out.println("Возможные операции: сложение(+), вычитание(-), умножение(*) и деление(/).");
         System.out.print("Введите выражение через пробел: ");
 
-        try {
-            Scanner sc = new Scanner(System.in);
-            String input = sc.nextLine();
-
-//            if (isInputString(input))
-//                System.out.println("ok");
-//            else System.out.println("not ok");
-//            if (inRangeNumber(input))
-//                System.out.println("ok range");
-//            else System.out.println("not ok range");
-
-            if (checkRoman(input)) {
-                String arabic = convertToArabic(input);
-                String resArabic = calc(arabic);
-                System.out.println(resArabic);
-                System.out.println("Roman ok");
-                System.out.println(convertToRoman(resArabic));
-            } else System.out.println("Roman not ok");
-
-            if (checkArabic(input)) {
-                System.out.println("Arabic ok");
-                System.out.println(calc(input));
-            } else System.out.println("Arabic not ok");
-
-
-        } catch (NumberFormatException e) {
-            System.out.println("Введите целое число!");
+        Scanner sc = new Scanner(System.in);
+        String input = sc.nextLine();
+        sc.close();
+        boolean arabicBol = false;
+        boolean flag = false;
+        if (checkString(input)) {
+            System.out.println("Используются одновременно разные системы счисления!");
+            flag = true;
         }
-
-
+        if (isInputString(input)) {
+            if (isOperation(input)) {
+                if (inRangeArabic(input)) {
+                    if (checkArabic(input)) {
+                        System.out.println("Ответ: " + calc(input));
+                        arabicBol = true;
+                    }
+                }
+                if (!arabicBol) {
+                    if (checkRoman(input)) {
+                        String arabic = convertToArabic(input);
+                        String resArabic = calc(arabic);
+                        System.out.println("Ответ: " + convertToRoman(resArabic));
+                    } else if (!flag) {
+                        System.out.println("Диапозон целых чисел должен быть от 1 до 10!");
+                    }
+                }
+            } else System.out.println("Неверная арифметическая операция!");
+        } else System.out.println("Строка не является математической выражением!");
     }
-
-
 }
